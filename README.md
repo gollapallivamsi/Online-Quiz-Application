@@ -60,8 +60,8 @@ The schema includes:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/quiz-app-backend.git
-   cd quiz-app-backend
+   git clone https://gollapallivamsi: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@github.com/gollapallivamsi/domain.git
+   cd Online-Quiz-Application
    ```
 
 2. Import into your Java IDE (e.g. IntelliJ, Eclipse)
@@ -74,25 +74,17 @@ The schema includes:
    ```java
    private static final String URL = "jdbc:mysql://localhost:3306/quiz_app";
    private static final String USER = "root";
-   private static final String PASSWORD = "your_password";
+   private static final String PASSWORD = "password";
    ```
 
 5. Run the Java classes for testing functionalities
 
 ---
 
-## 📌 Notes
-
-- No frontend is included (backend only)
-- Add exception handling and validations for production-level use
-- You can extend this with REST APIs using Spring Boot later
-
----
-
 ## 📧 Contact
 
 For queries or collaboration:
-**Your Name**  
-📧 youremail@example.com  
-🌐 [LinkedIn Profile] (optional)
+vamsi gollapalli 
+📧 vamsigollapalli0@gmail.com 
+
 
