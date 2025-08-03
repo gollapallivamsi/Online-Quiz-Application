@@ -1,47 +1,48 @@
-public class QuizService {
 
-    public static void takeQuiz(int quizId, int userId) throws Exception {
-        ResultSet questions = QuestionDAO.getQuestionsForQuiz(quizId);
-        int score = 0;
-        int total = 0;
+ public class AttemptDAO {
 
-        Scanner scanner = new Scanner(System.in);
+    public static int createQuizAttempt(int userId, int quizId) throws SQLException {
+        int attemptId = -1;
+        try (Connection conn = DBConnection.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(
+                "INSERT INTO quiz_attempts (user_id, quiz_id, score) VALUES (?, ?, 0)", Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, userId);
+            ps.setInt(2, quizId);
+            ps.executeUpdate();
 
-        // Create quiz attempt
-        int attemptId = AttemptDAO.createQuizAttempt(userId, quizId);
-
-        while (questions.next()) {
-            int questionId = questions.getInt("id");
-            String questionText = questions.getString("question_text");
-            System.out.println("Q: " + questionText);
-
-            ResultSet options = QuestionDAO.getOptionsForQuestion(questionId);
-            Map<Integer, Boolean> optionMap = new HashMap<>();
-            Map<Integer, String> displayMap = new HashMap<>();
-            int i = 1;
-
-            while (options.next()) {
-                int optionId = options.getInt("id");
-                String text = options.getString("option_text");
-                boolean isCorrect = options.getBoolean("is_correct");
-                optionMap.put(i, isCorrect);
-                displayMap.put(i, text);
-                System.out.println(i + ". " + text);
-                i++;
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                attemptId = rs.getInt(1);
             }
-
-            System.out.print("Your answer (1-4): ");
-            int userChoice = scanner.nextInt();
-            boolean correct = optionMap.getOrDefault(userChoice, false);
-            System.out.println(correct ? "Correct!" : "Wrong!");
-
-            if (correct) score++;
-            total++;
-
-            AttemptDAO.insertAttemptDetail(attemptId, questionId, userChoice, correct);
         }
+        return attemptId;
+    }
 
-        AttemptDAO.updateScore(attemptId, score);
-        System.out.println("\nQuiz completed. Your score: " + score + "/" + total);
+    public static void insertAttemptDetail(int attemptId, int questionId, int selectedOptionId, boolean isCorrect) throws SQLException {
+        try (Connection conn = DBConnection.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement(
+                "INSERT INTO attempt_details (attempt_id, question_id, selected_option_id, is_correct) VALUES (?, ?, ?, ?)");
+            ps.setInt(1, attemptId);
+            ps.setInt(2, questionId);
+            ps.setInt(3, selectedOptionId);
+            ps.setBoolean(4, isCorrect);
+            ps.executeUpdate();
+        }
+    }
+
+    public static void updateScore(int attemptId, int score) throws SQLException {
+        try (Connection conn = DBConnection.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement("UPDATE quiz_attempts SET score = ? WHERE id = ?");
+            ps.setInt(1, score);
+            ps.setInt(2, attemptId);
+            ps.executeUpdate();
+        }
+    }
+
+    public static ResultSet getAttemptsForUser(int userId) throws SQLException {
+        Connection conn = DBConnection.getConnection();
+        PreparedStatement ps = conn.prepareStatement("SELECT * FROM quiz_attempts WHERE user_id = ?");
+        ps.setInt(1, userId);
+        return ps.executeQuery();
     }
 }
